@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:prepare && vite build",
-    "build:prepare": "npm install && npm run lint",
+    "build:prepare": "npm install --legacy-peer-deps && npm run lint",
     "lint": "eslint .",
     "preview": "vite preview"
   },
