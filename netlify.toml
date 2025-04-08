@@ -1,7 +1,7 @@
 [build]
   base = "/"
   publish = "dist"
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps && npm install vite --save-dev && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -10,7 +10,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.production]
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps && npm install vite --save-dev && npm run build"
   publish = "dist"
 
 [context.production.environment]
@@ -20,7 +20,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.deploy-preview]
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps && npm install vite --save-dev && npm run build"
   publish = "dist"
 
 [context.deploy-preview.environment]
@@ -30,7 +30,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.branch-deploy]
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps && npm install vite --save-dev && npm run build"
   publish = "dist"
 
 [context.branch-deploy.environment]
