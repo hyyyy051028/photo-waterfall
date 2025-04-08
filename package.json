@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build:prepare && vite build",
+    "build:prepare": "npm install && npm run lint",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -30,5 +31,26 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:react/recommended",
+      "plugin:react-hooks/recommended"
+    ],
+    "rules": {
+      "react/react-in-jsx-scope": "off"
+    }
   }
 }

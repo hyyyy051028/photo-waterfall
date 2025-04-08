@@ -1,11 +1,13 @@
 [build]
-  command = "npm run build"
-  publish = "dist"
   base = "/"
+  publish = "dist"
   functions = "netlify/functions"
+  command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
+  CI = "true"
+  NODE_ENV = "production"
 
 [context.production]
   command = "npm run build"
@@ -13,3 +15,23 @@
 
 [context.production.environment]
   NODE_VERSION = "18"
+  CI = "true"
+  NODE_ENV = "production"
+
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "18"
+  CI = "true"
+  NODE_ENV = "production"
+
+[context.branch-deploy]
+  command = "npm run build"
+  publish = "dist"
+
+[context.branch-deploy.environment]
+  NODE_VERSION = "18"
+  CI = "true"
+  NODE_ENV = "production"

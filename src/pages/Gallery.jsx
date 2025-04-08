@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Masonry from 'react-masonry-css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { getAllPhotos, updatePhotoOrder } from '../services/db';
 import ImagePreview from '../components/ImagePreview';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -11,14 +10,11 @@ import '../App.css';
 function Gallery() {
   const [allPhotos, setAllPhotos] = useState([]);
   const [displayedPhotos, setDisplayedPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [layout, setLayout] = useState('masonry');
-  const [hoverPhoto, setHoverPhoto] = useState(null);
   const [selectedSize, setSelectedSize] = useState('mixed');
   const [previewIndex, setPreviewIndex] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const pageSize = 12;
   const loadMoreRef = useRef(null);
   const navigate = useNavigate();
@@ -36,41 +32,31 @@ function Gallery() {
         setHasMore(sortedPhotos.length > pageSize);
       } catch (error) {
         console.error('Error loading photos:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
     loadPhotos();
   }, []);
 
-  // 处理拖拽结束
-  const onDragEnd = async (result) => {
-    setIsDragging(false);
-    
-    if (!result.destination) return;
-    
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    
-    if (sourceIndex === destinationIndex) return;
+  // 处理照片排序
+  const handleSort = async (photoId) => {
+    const currentPhoto = displayedPhotos.find(p => p.id === photoId);
+    if (!currentPhoto) return;
 
-    const newPhotos = Array.from(displayedPhotos);
-    const [removed] = newPhotos.splice(sourceIndex, 1);
-    newPhotos.splice(destinationIndex, 0, removed);
+    // 将选中的照片移到最前面
+    const newPhotos = [
+      currentPhoto,
+      ...displayedPhotos.filter(p => p.id !== photoId)
+    ];
 
     // 更新显示的照片顺序
     setDisplayedPhotos(newPhotos);
 
     // 更新所有照片的顺序
-    const newAllPhotos = Array.from(allPhotos);
-    const allSourceIndex = allPhotos.findIndex(p => p.id === removed.id);
-    const [allRemoved] = newAllPhotos.splice(allSourceIndex, 1);
-    const allDestinationIndex = Math.min(
-      destinationIndex + (allSourceIndex < destinationIndex ? 1 : 0),
-      newAllPhotos.length
-    );
-    newAllPhotos.splice(allDestinationIndex, 0, allRemoved);
+    const newAllPhotos = [
+      currentPhoto,
+      ...allPhotos.filter(p => p.id !== photoId)
+    ];
     setAllPhotos(newAllPhotos);
 
     // 保存新的顺序到数据库
@@ -84,14 +70,9 @@ function Gallery() {
     }
   };
 
-  // 处理拖拽开始
-  const onDragStart = () => {
-    setIsDragging(true);
-  };
-
   // 加载更多照片
   const loadMore = useCallback(() => {
-    if (loadingMore || !hasMore || isDragging) return;
+    if (loadingMore || !hasMore) return;
     
     setLoadingMore(true);
     const currentLength = displayedPhotos.length;
@@ -102,7 +83,7 @@ function Gallery() {
       setHasMore(currentLength + pageSize < allPhotos.length);
       setLoadingMore(false);
     }, 500);
-  }, [displayedPhotos.length, allPhotos, hasMore, loadingMore, isDragging]);
+  }, [displayedPhotos.length, allPhotos, hasMore, loadingMore]);
 
   // 监听滚动
   useEffect(() => {
@@ -128,133 +109,92 @@ function Gallery() {
     };
   }, [loadMore]);
 
-  // 预览控制
-  const handlePreviewOpen = (index) => {
-    if (isDragging) return;
-    setPreviewIndex(index);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const handlePreviewClose = () => {
-    setPreviewIndex(null);
-    document.body.style.overflow = 'auto';
-  };
-
-  const handlePrevImage = () => {
-    setPreviewIndex((prev) => (prev > 0 ? prev - 1 : displayedPhotos.length - 1));
-  };
-
-  const handleNextImage = () => {
-    setPreviewIndex((prev) => (prev < displayedPhotos.length - 1 ? prev + 1 : 0));
-  };
-
-  // 瀑布流的断点设置
-  const breakpointColumns = {
-    default: selectedSize === 'small' ? 4 : selectedSize === 'large' ? 2 : 3,
-    1800: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 3,
-    1400: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 2,
-    1100: selectedSize === 'small' ? 2 : selectedSize === 'large' ? 1 : 2,
-    700: selectedSize === 'small' ? 2 : 1,
-    500: 1,
-  };
-
   // 获取随机的照片样式
-  const getPhotoStyle = (index) => {
-    if (selectedSize !== 'mixed') return {};
+  const getPhotoStyle = useCallback(() => {
+    const baseStyles = {
+      transition: 'all 0.3s ease',
+      cursor: 'pointer',
+      borderRadius: '8px',
+      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 6px',
+      margin: '8px'
+    };
 
-    const styles = [
-      { flex: '2', margin: '0 8px' }, // 大尺寸
-      { flex: '1', margin: '0 8px' }, // 正常尺寸
-      { flex: '1.5', margin: '0 8px' }, // 中等尺寸
-      { flex: '0.8', margin: '0 8px' }, // 小尺寸
-    ];
-    return styles[index % styles.length];
-  };
+    if (selectedSize === 'mixed') {
+      const randomSize = Math.random() > 0.5 ? 'large' : 'small';
+      return {
+        ...baseStyles,
+        width: randomSize === 'large' ? '300px' : '200px',
+        height: randomSize === 'large' ? '400px' : '300px'
+      };
+    }
+
+    if (selectedSize === 'large') {
+      return {
+        ...baseStyles,
+        width: '300px',
+        height: '400px'
+      };
+    }
+
+    return {
+      ...baseStyles,
+      width: '200px',
+      height: '300px'
+    };
+  }, [selectedSize]);
 
   // 渲染照片项
-  const renderPhotoItem = (photo, index, provided = null, snapshot = null) => {
-    const isHovered = hoverPhoto === photo.id;
-    const photoStyle = getPhotoStyle(index);
-    const isDraggingThis = snapshot?.isDragging;
-
+  const renderPhotoItem = useCallback((photo) => {
+    const style = getPhotoStyle();
+    
     return (
       <div
-        ref={provided?.innerRef}
-        {...provided?.draggableProps}
-        {...provided?.dragHandleProps}
-        className={`photo-item ${layout}-item ${selectedSize}-size ${isDraggingThis ? 'dragging' : ''}`}
-        onMouseEnter={() => setHoverPhoto(photo.id)}
-        onMouseLeave={() => setHoverPhoto(null)}
-        style={{
-          ...photoStyle,
-          ...provided?.draggableProps?.style,
-        }}
-        onClick={() => !isDragging && handlePreviewOpen(index)}
+        key={photo.id}
+        className="photo-item"
+        style={style}
+        onClick={() => handleSort(photo.id)}
       >
-        <div className={`photo-wrapper ${isHovered ? 'hovered' : ''}`}>
-          <LazyLoadImage
-            alt={photo.name}
-            src={photo.url}
-            effect="blur"
-            className={`photo ${layout}-photo`}
-          />
-          <div className="photo-info">
-            <span className="photo-name">{photo.name}</span>
-            <span className="photo-date">
-              {new Date(photo.uploadDate).toLocaleDateString()}
-            </span>
-          </div>
+        <LazyLoadImage
+          src={photo.url}
+          alt={photo.name}
+          effect="blur"
+          className="photo-image"
+        />
+        <div className="photo-info">
+          <span className="photo-name">{photo.name}</span>
+          <span className="photo-date">{new Date(photo.uploadDate).toLocaleDateString()}</span>
         </div>
       </div>
     );
-  };
+  }, [getPhotoStyle, handleSort]);
 
-  if (loading) {
-    return (
-      <div className="app">
-        <div className="loading">加载中...</div>
-      </div>
-    );
-  }
-
-  const renderPhotoGrid = () => {
+  // 渲染照片网格
+  const renderPhotoGrid = useCallback(() => {
     if (layout === 'masonry') {
       return (
-        <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
-          <Droppable droppableId="photos" type="PHOTO">
-            {(provided) => (
-              <Masonry
-                breakpointCols={breakpointColumns}
-                className={`photo-grid masonry-layout ${selectedSize}-size`}
-                columnClassName="masonry-column"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {displayedPhotos.map((photo, index) => (
-                  <Draggable
-                    key={photo.id}
-                    draggableId={photo.id}
-                    index={index}
-                  >
-                    {(provided, snapshot) =>
-                      renderPhotoItem(photo, index, provided, snapshot)
-                    }
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Masonry>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <Masonry
+          breakpointCols={{
+            default: selectedSize === 'small' ? 4 : selectedSize === 'large' ? 2 : 3,
+            1800: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 3,
+            1400: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 2,
+            1100: selectedSize === 'small' ? 2 : selectedSize === 'large' ? 1 : 2,
+            700: selectedSize === 'small' ? 2 : 1,
+            500: 1,
+          }}
+          className={`photo-grid masonry-layout ${selectedSize}-size`}
+          columnClassName="masonry-column"
+        >
+          {displayedPhotos.map((photo) => renderPhotoItem(photo))}
+        </Masonry>
       );
     }
 
     return (
       <div className={`photo-container ${layout}-layout`}>
-        {displayedPhotos.map((photo, index) => renderPhotoItem(photo, index))}
+        {displayedPhotos.map((photo) => renderPhotoItem(photo))}
       </div>
     );
-  };
+  }, [layout, selectedSize, displayedPhotos, renderPhotoItem]);
 
   return (
     <div className="app">
@@ -340,9 +280,7 @@ function Gallery() {
         <ImagePreview
           photos={displayedPhotos}
           currentIndex={previewIndex}
-          onClose={handlePreviewClose}
-          onPrev={handlePrevImage}
-          onNext={handleNextImage}
+          onClose={() => setPreviewIndex(null)}
         />
       )}
     </div>

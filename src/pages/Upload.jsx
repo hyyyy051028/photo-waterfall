@@ -55,7 +55,7 @@ function Upload() {
   // 处理文件上传事件
   const handleFileUpload = useCallback((event) => {
     handleFiles(event.target.files)
-  }, [])
+  }, [handleFiles])
 
   // 处理拖拽事件
   const handleDragOver = useCallback((e) => {
@@ -72,7 +72,7 @@ function Upload() {
     e.preventDefault()
     setIsDragging(false)
     handleFiles(e.dataTransfer.files)
-  }, [])
+  }, [handleFiles])
 
   return (
     <div 
