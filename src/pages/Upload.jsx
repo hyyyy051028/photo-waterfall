@@ -11,7 +11,7 @@ function Upload() {
   const navigate = useNavigate()
 
   // 处理文件上传
-  const handleFiles = async (files) => {
+  const handleFiles = useCallback(async (files) => {
     if (isUploading) return
     setIsUploading(true)
 
@@ -50,7 +50,7 @@ function Upload() {
     } finally {
       setIsUploading(false)
     }
-  }
+  }, [isUploading, setToast])
 
   // 处理文件上传事件
   const handleFileUpload = useCallback((event) => {

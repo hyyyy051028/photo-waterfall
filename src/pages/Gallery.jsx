@@ -39,7 +39,7 @@ function Gallery() {
   }, []);
 
   // 处理照片排序
-  const handleSort = async (photoId) => {
+  const handleSort = useCallback(async (photoId) => {
     const currentPhoto = displayedPhotos.find(p => p.id === photoId);
     if (!currentPhoto) return;
 
@@ -68,7 +68,7 @@ function Gallery() {
     } catch (error) {
       console.error('Error updating photo order:', error);
     }
-  };
+  }, [displayedPhotos, allPhotos, setDisplayedPhotos, setAllPhotos]);
 
   // 加载更多照片
   const loadMore = useCallback(() => {

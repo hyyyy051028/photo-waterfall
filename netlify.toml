@@ -2,7 +2,7 @@
   base = "/"
   publish = "dist"
   functions = "netlify/functions"
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "powershell -Command \"npm install --legacy-peer-deps; npm run build\""
 
 [build.environment]
   NODE_VERSION = "18"
@@ -11,7 +11,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.production]
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "powershell -Command \"npm install --legacy-peer-deps; npm run build\""
   publish = "dist"
 
 [context.production.environment]
@@ -21,7 +21,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.deploy-preview]
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "powershell -Command \"npm install --legacy-peer-deps; npm run build\""
   publish = "dist"
 
 [context.deploy-preview.environment]
@@ -31,7 +31,7 @@
   NPM_FLAGS = "--legacy-peer-deps"
 
 [context.branch-deploy]
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "powershell -Command \"npm install --legacy-peer-deps; npm run build\""
   publish = "dist"
 
 [context.branch-deploy.environment]
