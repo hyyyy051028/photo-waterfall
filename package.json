@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "@vitejs/plugin-react": "^4.2.1",
+    "cloudinary": "^2.6.0",
+    "firebase": "^11.6.0",
     "idb": "^8.0.2",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
@@ -17,8 +21,7 @@
     "react-lazy-load-image-component": "^1.6.3",
     "react-masonry-css": "^1.0.16",
     "react-router-dom": "^6.21.3",
-    "vite": "^5.0.12",
-    "@vitejs/plugin-react": "^4.2.1"
+    "vite": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Masonry from 'react-masonry-css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { getAllPhotos, updatePhotoOrder } from '../services/db';
+import { getAllPhotos, deletePhoto } from '../supabase';
 import ImagePreview from '../components/ImagePreview';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import '../App.css';
@@ -19,13 +19,13 @@ function Gallery() {
   const loadMoreRef = useRef(null);
   const navigate = useNavigate();
 
-  // 从IndexedDB加载照片
+  // 从 Supabase 加载照片
   useEffect(() => {
     const loadPhotos = async () => {
       try {
         const photos = await getAllPhotos();
         const sortedPhotos = photos.sort((a, b) =>
-          b.uploadDate.localeCompare(a.uploadDate)
+          b.upload_date.localeCompare(a.upload_date)
         );
         setAllPhotos(sortedPhotos);
         setDisplayedPhotos(sortedPhotos.slice(0, pageSize));
@@ -37,43 +37,6 @@ function Gallery() {
 
     loadPhotos();
   }, []);
-
-  // 处理照片排序
-  const handleSort = useCallback(
-    async (photoId) => {
-      const currentPhoto = displayedPhotos.find((p) => p.id === photoId);
-      if (!currentPhoto) return;
-
-      // 将选中的照片移到最前面
-      const newPhotos = [
-        currentPhoto,
-        ...displayedPhotos.filter((p) => p.id !== photoId),
-      ];
-
-      // 更新显示的照片顺序
-      setDisplayedPhotos(newPhotos);
-
-      // 更新所有照片的顺序
-      const newAllPhotos = [
-        currentPhoto,
-        ...allPhotos.filter((p) => p.id !== photoId),
-      ];
-      setAllPhotos(newAllPhotos);
-
-      // 保存新的顺序到数据库
-      try {
-        await updatePhotoOrder(
-          newAllPhotos.map((photo, index) => ({
-            id: photo.id,
-            order: index,
-          }))
-        );
-      } catch (error) {
-        console.error('Error updating photo order:', error);
-      }
-    },
-    [displayedPhotos, allPhotos, setDisplayedPhotos, setAllPhotos]
-  );
 
   // 加载更多照片
   const loadMore = useCallback(() => {
@@ -148,33 +111,35 @@ function Gallery() {
     };
   }, [selectedSize]);
 
-  // 处理预览导航
-  const handlePrevPreview = useCallback(() => {
-    if (previewIndex > 0) {
-      setPreviewIndex(previewIndex - 1);
-    }
-  }, [previewIndex]);
+  // 处理照片删除
+  const handleDelete = useCallback(
+    async (photoId) => {
+      if (window.confirm('确定要删除这张照片吗？')) {
+        try {
+          await deletePhoto(photoId);
+          setAllPhotos((prev) => prev.filter((p) => p.id !== photoId));
+          setDisplayedPhotos((prev) => prev.filter((p) => p.id !== photoId));
+        } catch (error) {
+          console.error('Error deleting photo:', error);
+          alert('删除照片失败，请稍后重试');
+        }
+      }
+    },
+    []
+  );
 
-  const handleNextPreview = useCallback(() => {
-    if (previewIndex < displayedPhotos.length - 1) {
-      setPreviewIndex(previewIndex + 1);
-    }
-  }, [previewIndex, displayedPhotos.length]);
-
-  // 渲染照片项
+  // 渲染单个照片项
   const renderPhotoItem = useCallback(
     (photo) => {
       return (
-        <div
+        <div 
           key={photo.id}
-          className="photo-item"
-          onClick={() =>
-            setPreviewIndex(displayedPhotos.findIndex((p) => p.id === photo.id))
-          }
-          onDoubleClick={() => handleSort(photo.id)}
+          className="photo-item" 
+          style={getPhotoStyle()}
+          onClick={() => setPreviewIndex(displayedPhotos.indexOf(photo))}
         >
           <LazyLoadImage
-            src={photo.url}
+            src={photo.public_url}
             alt={photo.name}
             effect="blur"
             className="photo-image"
@@ -183,13 +148,23 @@ function Gallery() {
           <div className="photo-info">
             <span className="photo-name">{photo.name}</span>
             <span className="photo-date">
-              {new Date(photo.uploadDate).toLocaleDateString()}
+              {new Date(photo.upload_date).toLocaleDateString()}
             </span>
+            <button
+              className="delete-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(photo.id);
+              }}
+              title="删除"
+            >
+              ×
+            </button>
           </div>
         </div>
       );
     },
-    [displayedPhotos, handleSort]
+    [displayedPhotos, getPhotoStyle, handleDelete]
   );
 
   // 渲染照片网格
@@ -314,8 +289,6 @@ function Gallery() {
           photos={displayedPhotos}
           currentIndex={previewIndex}
           onClose={() => setPreviewIndex(null)}
-          onPrev={handlePrevPreview}
-          onNext={handleNextPreview}
         />
       )}
     </div>
