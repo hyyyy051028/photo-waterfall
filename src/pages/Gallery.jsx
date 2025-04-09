@@ -24,7 +24,7 @@ function Gallery() {
     const loadPhotos = async () => {
       try {
         const photos = await getAllPhotos();
-        const sortedPhotos = photos.sort((a, b) => 
+        const sortedPhotos = photos.sort((a, b) =>
           b.uploadDate.localeCompare(a.uploadDate)
         );
         setAllPhotos(sortedPhotos);
@@ -39,47 +39,52 @@ function Gallery() {
   }, []);
 
   // 处理照片排序
-  const handleSort = useCallback(async (photoId) => {
-    const currentPhoto = displayedPhotos.find(p => p.id === photoId);
-    if (!currentPhoto) return;
+  const handleSort = useCallback(
+    async (photoId) => {
+      const currentPhoto = displayedPhotos.find((p) => p.id === photoId);
+      if (!currentPhoto) return;
 
-    // 将选中的照片移到最前面
-    const newPhotos = [
-      currentPhoto,
-      ...displayedPhotos.filter(p => p.id !== photoId)
-    ];
+      // 将选中的照片移到最前面
+      const newPhotos = [
+        currentPhoto,
+        ...displayedPhotos.filter((p) => p.id !== photoId),
+      ];
 
-    // 更新显示的照片顺序
-    setDisplayedPhotos(newPhotos);
+      // 更新显示的照片顺序
+      setDisplayedPhotos(newPhotos);
 
-    // 更新所有照片的顺序
-    const newAllPhotos = [
-      currentPhoto,
-      ...allPhotos.filter(p => p.id !== photoId)
-    ];
-    setAllPhotos(newAllPhotos);
+      // 更新所有照片的顺序
+      const newAllPhotos = [
+        currentPhoto,
+        ...allPhotos.filter((p) => p.id !== photoId),
+      ];
+      setAllPhotos(newAllPhotos);
 
-    // 保存新的顺序到数据库
-    try {
-      await updatePhotoOrder(newAllPhotos.map((photo, index) => ({
-        id: photo.id,
-        order: index
-      })));
-    } catch (error) {
-      console.error('Error updating photo order:', error);
-    }
-  }, [displayedPhotos, allPhotos, setDisplayedPhotos, setAllPhotos]);
+      // 保存新的顺序到数据库
+      try {
+        await updatePhotoOrder(
+          newAllPhotos.map((photo, index) => ({
+            id: photo.id,
+            order: index,
+          }))
+        );
+      } catch (error) {
+        console.error('Error updating photo order:', error);
+      }
+    },
+    [displayedPhotos, allPhotos, setDisplayedPhotos, setAllPhotos]
+  );
 
   // 加载更多照片
   const loadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
-    
+
     setLoadingMore(true);
     const currentLength = displayedPhotos.length;
     const nextPhotos = allPhotos.slice(currentLength, currentLength + pageSize);
-    
+
     setTimeout(() => {
-      setDisplayedPhotos(prev => [...prev, ...nextPhotos]);
+      setDisplayedPhotos((prev) => [...prev, ...nextPhotos]);
       setHasMore(currentLength + pageSize < allPhotos.length);
       setLoadingMore(false);
     }, 500);
@@ -116,7 +121,7 @@ function Gallery() {
       cursor: 'pointer',
       borderRadius: '8px',
       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 6px',
-      margin: '8px'
+      margin: '8px',
     };
 
     if (selectedSize === 'mixed') {
@@ -124,7 +129,7 @@ function Gallery() {
       return {
         ...baseStyles,
         width: randomSize === 'large' ? '300px' : '200px',
-        height: randomSize === 'large' ? '400px' : '300px'
+        height: randomSize === 'large' ? '400px' : '300px',
       };
     }
 
@@ -132,41 +137,44 @@ function Gallery() {
       return {
         ...baseStyles,
         width: '300px',
-        height: '400px'
+        height: '400px',
       };
     }
 
     return {
       ...baseStyles,
       width: '200px',
-      height: '300px'
+      height: '300px',
     };
   }, [selectedSize]);
 
   // 渲染照片项
-  const renderPhotoItem = useCallback((photo) => {
-    const style = getPhotoStyle();
-    
-    return (
-      <div
-        key={photo.id}
-        className="photo-item"
-        style={style}
-        onClick={() => handleSort(photo.id)}
-      >
-        <LazyLoadImage
-          src={photo.url}
-          alt={photo.name}
-          effect="blur"
-          className="photo-image"
-        />
-        <div className="photo-info">
-          <span className="photo-name">{photo.name}</span>
-          <span className="photo-date">{new Date(photo.uploadDate).toLocaleDateString()}</span>
+  const renderPhotoItem = useCallback(
+    (photo) => {
+      return (
+        <div
+          key={photo.id}
+          className="photo-item"
+          onClick={() => handleSort(photo.id)}
+        >
+          <LazyLoadImage
+            src={photo.url}
+            alt={photo.name}
+            effect="blur"
+            className="photo-image"
+            wrapperClassName="photo-image-wrapper"
+          />
+          <div className="photo-info">
+            <span className="photo-name">{photo.name}</span>
+            <span className="photo-date">
+              {new Date(photo.uploadDate).toLocaleDateString()}
+            </span>
+          </div>
         </div>
-      </div>
-    );
-  }, [getPhotoStyle, handleSort]);
+      );
+    },
+    [handleSort]
+  );
 
   // 渲染照片网格
   const renderPhotoGrid = useCallback(() => {
@@ -174,14 +182,14 @@ function Gallery() {
       return (
         <Masonry
           breakpointCols={{
-            default: selectedSize === 'small' ? 4 : selectedSize === 'large' ? 2 : 3,
-            1800: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 3,
-            1400: selectedSize === 'small' ? 3 : selectedSize === 'large' ? 2 : 2,
-            1100: selectedSize === 'small' ? 2 : selectedSize === 'large' ? 1 : 2,
-            700: selectedSize === 'small' ? 2 : 1,
+            default: 4,
+            1800: 3,
+            1400: 2,
+            1100: 2,
+            700: 1,
             500: 1,
           }}
-          className={`photo-grid masonry-layout ${selectedSize}-size`}
+          className="photo-grid masonry-layout"
           columnClassName="masonry-column"
         >
           {displayedPhotos.map((photo) => renderPhotoItem(photo))}
@@ -194,7 +202,7 @@ function Gallery() {
         {displayedPhotos.map((photo) => renderPhotoItem(photo))}
       </div>
     );
-  }, [layout, selectedSize, displayedPhotos, renderPhotoItem]);
+  }, [layout, displayedPhotos, renderPhotoItem]);
 
   return (
     <div className="app">
@@ -251,7 +259,10 @@ function Gallery() {
               </button>
             </div>
           )}
-          <button className="upload-button" onClick={() => navigate('/')}>
+          <button
+            className="upload-button"
+            onClick={() => navigate('/')}
+          >
             返回上传
           </button>
         </div>
@@ -261,7 +272,10 @@ function Gallery() {
       {allPhotos.length === 0 ? (
         <div className="empty-state">
           <p>还没有上传任何照片</p>
-          <button className="upload-button" onClick={() => navigate('/')}>
+          <button
+            className="upload-button"
+            onClick={() => navigate('/')}
+          >
             去上传照片
           </button>
         </div>
@@ -269,7 +283,10 @@ function Gallery() {
         <>
           {renderPhotoGrid()}
           {hasMore && (
-            <div ref={loadMoreRef} className="load-more">
+            <div
+              ref={loadMoreRef}
+              className="load-more"
+            >
               {loadingMore ? '加载更多...' : ''}
             </div>
           )}

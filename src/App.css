@@ -191,75 +191,69 @@
 /* 瀑布流布局 */
 .photo-grid.masonry-layout {
   display: flex;
-  margin-left: -24px;
+  margin-left: -16px;
   width: auto;
-  padding: 24px;
+  padding: 16px;
 }
 
 .masonry-column {
-  padding-left: 24px;
+  padding-left: 16px;
   background-clip: padding-box;
 }
 
 .photo-grid.masonry-layout .photo-item {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   transition: all 0.3s ease;
   position: relative;
   width: 100%;
   break-inside: avoid;
-}
-
-.photo-wrapper {
-  position: relative;
-  width: 100%;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.photo-wrapper:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+.photo-grid.masonry-layout .photo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.photo-wrapper img {
+.photo-grid.masonry-layout .photo-image {
   width: 100%;
   height: auto;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
 }
 
-.photo-info {
+.photo-grid.masonry-layout .photo-info {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 12px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   color: #fff;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.photo-wrapper:hover .photo-info {
+.photo-grid.masonry-layout .photo-item:hover .photo-info {
   opacity: 1;
 }
 
-.photo-name {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 6px;
+.photo-grid.masonry-layout .photo-name {
   display: block;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.photo-date {
-  font-size: 14px;
-  opacity: 0.9;
+.photo-grid.masonry-layout .photo-date {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 /* 网格布局 */
