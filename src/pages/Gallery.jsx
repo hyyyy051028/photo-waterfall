@@ -148,6 +148,19 @@ function Gallery() {
     };
   }, [selectedSize]);
 
+  // 处理预览导航
+  const handlePrevPreview = useCallback(() => {
+    if (previewIndex > 0) {
+      setPreviewIndex(previewIndex - 1);
+    }
+  }, [previewIndex]);
+
+  const handleNextPreview = useCallback(() => {
+    if (previewIndex < displayedPhotos.length - 1) {
+      setPreviewIndex(previewIndex + 1);
+    }
+  }, [previewIndex, displayedPhotos.length]);
+
   // 渲染照片项
   const renderPhotoItem = useCallback(
     (photo) => {
@@ -155,7 +168,10 @@ function Gallery() {
         <div
           key={photo.id}
           className="photo-item"
-          onClick={() => handleSort(photo.id)}
+          onClick={() =>
+            setPreviewIndex(displayedPhotos.findIndex((p) => p.id === photo.id))
+          }
+          onDoubleClick={() => handleSort(photo.id)}
         >
           <LazyLoadImage
             src={photo.url}
@@ -173,7 +189,7 @@ function Gallery() {
         </div>
       );
     },
-    [handleSort]
+    [displayedPhotos, handleSort]
   );
 
   // 渲染照片网格
@@ -298,6 +314,8 @@ function Gallery() {
           photos={displayedPhotos}
           currentIndex={previewIndex}
           onClose={() => setPreviewIndex(null)}
+          onPrev={handlePrevPreview}
+          onNext={handleNextPreview}
         />
       )}
     </div>
