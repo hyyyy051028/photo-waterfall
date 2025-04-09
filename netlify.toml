@@ -1,40 +1,12 @@
 [build]
-  base = "/"
+  command = "npm ci && npm run build"
   publish = "dist"
-  command = "npm ci --legacy-peer-deps && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
-  CI = "true"
   NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
 
-[context.production]
-  command = "npm ci --legacy-peer-deps && npm run build"
-  publish = "dist"
-
-[context.production.environment]
-  NODE_VERSION = "18"
-  CI = "true"
-  NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
-
-[context.deploy-preview]
-  command = "npm ci --legacy-peer-deps && npm run build"
-  publish = "dist"
-
-[context.deploy-preview.environment]
-  NODE_VERSION = "18"
-  CI = "true"
-  NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
-
-[context.branch-deploy]
-  command = "npm ci --legacy-peer-deps && npm run build"
-  publish = "dist"
-
-[context.branch-deploy.environment]
-  NODE_VERSION = "18"
-  CI = "true"
-  NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
