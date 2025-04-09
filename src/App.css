@@ -42,10 +42,10 @@
 }
 
 .app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
 }
 
 .drop-zone {
@@ -67,17 +67,33 @@
 }
 
 .header {
+  width: 100%;
+  margin: 0 0 3rem;
+  padding: 2rem;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header h1 {
+  font-size: 2.5em;
+  color: #1a237e;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
 }
 
 .controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin: 1rem 0;
+  gap: 1.5rem;
+  margin: 2rem 0;
   flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
 }
 
 .layout-buttons, .size-buttons {
@@ -86,13 +102,14 @@
 }
 
 .layout-button, .size-button {
-  padding: 8px 16px;
-  border: 1px solid #646cff;
-  background: transparent;
+  padding: 10px 20px;
+  border: none;
+  background: #f0f2ff;
   color: #646cff;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: 500;
 }
 
 .layout-button:hover, .size-button:hover {
@@ -191,38 +208,59 @@
 /* 瀑布流布局 */
 .photo-grid.masonry-layout {
   display: flex;
-  margin-left: -16px;
-  width: auto;
-  padding: 16px;
+  gap: 24px;
+  width: 100%;
+  padding: 24px;
+  max-width: 2000px;
+  margin: 0 auto;
 }
 
 .masonry-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   padding-left: 16px;
   background-clip: padding-box;
 }
 
 .photo-grid.masonry-layout .photo-item {
-  margin-bottom: 16px;
-  transition: all 0.3s ease;
   position: relative;
   width: 100%;
-  break-inside: avoid;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+  transition: all 0.3s ease;
+}
+
+.photo-grid.masonry-layout .photo-item {
+  margin-bottom: 24px;
+}
+
+.photo-grid.masonry-layout .photo-item.small {
+  height: 300px;
+}
+
+.photo-grid.masonry-layout .photo-item.large {
+  height: 400px;
 }
 
 .photo-grid.masonry-layout .photo-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 .photo-grid.masonry-layout .photo-image {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.photo-grid.masonry-layout .photo-item:hover .photo-image {
+  transform: scale(1.05);
 }
 
 .photo-grid.masonry-layout .photo-info {
@@ -230,15 +268,17 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 12px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.4), transparent);
   color: #fff;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
+  transform: translateY(10px);
 }
 
 .photo-grid.masonry-layout .photo-item:hover .photo-info {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .photo-grid.masonry-layout .photo-name {
@@ -374,141 +414,7 @@
   }
 }
 
-/* 图片预览 */
-.image-preview-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.3s ease-out;
-}
 
-.image-preview-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.preview-image-container {
-  position: relative;
-  max-width: 90%;
-  max-height: 90vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 4px;
-  animation: zoomIn 0.3s ease-out;
-}
-
-.preview-close-button {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s;
-  z-index: 1010;
-}
-
-.preview-close-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
-.preview-nav-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 50px;
-  height: 80px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 40px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s;
-  z-index: 1010;
-}
-
-.preview-nav-button.prev {
-  left: 20px;
-  border-radius: 0 40px 40px 0;
-}
-
-.preview-nav-button.next {
-  right: 20px;
-  border-radius: 40px 0 0 40px;
-}
-
-.preview-nav-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  width: 60px;
-}
-
-.preview-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  color: white;
-  text-align: center;
-}
-
-.preview-title {
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-}
-
-.preview-date {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-bottom: 8px;
-}
-
-.preview-counter {
-  font-size: 0.8rem;
-  opacity: 0.6;
-}
-
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 
 /* 加载更多 */
 .load-more {
@@ -747,23 +653,33 @@
 
 .delete-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(255, 0, 0, 0.7);
-  color: white;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff4444;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: scale(0.8);
   z-index: 1;
 }
 
 .delete-button:hover {
-  background: rgba(255, 0, 0, 0.9);
+  background: #ff4444;
+  color: white;
+  transform: scale(1.1);
+}
+
+.photo-item:hover .delete-button {
+  opacity: 1;
+  transform: scale(1);
 }

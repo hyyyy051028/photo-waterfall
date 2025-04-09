@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
+import '../styles/ImagePreview.css'
 
-function ImagePreview({ photos, currentIndex, onClose, onPrev, onNext }) {
+function ImagePreview({ photos, currentIndex, onClose }) {
   const [touchStart, setTouchStart] = useState(null)
   const [touchEnd, setTouchEnd] = useState(null)
   const currentPhoto = photos[currentIndex]
+
+  const onPrev = () => {
+    if (currentIndex > 0) {
+      onClose()
+      setTimeout(() => onClose(currentIndex - 1), 0)
+    }
+  }
+
+  const onNext = () => {
+    if (currentIndex < photos.length - 1) {
+      onClose()
+      setTimeout(() => onClose(currentIndex + 1), 0)
+    }
+  }
 
   // 键盘事件监听
   useEffect(() => {
@@ -70,11 +85,11 @@ function ImagePreview({ photos, currentIndex, onClose, onPrev, onNext }) {
         <button className="preview-nav-button next" onClick={onNext}>›</button>
         
         <div className="preview-image-container">
-          <LazyLoadImage
+          <img
             alt={currentPhoto.name}
-            src={currentPhoto.url}
-            effect="blur"
+            src={currentPhoto.public_url}
             className="preview-image"
+            loading="lazy"
           />
         </div>
         

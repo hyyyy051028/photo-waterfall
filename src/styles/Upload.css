@@ -73,7 +73,13 @@
 }
 
 .preview-container {
-  margin-top: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 3rem;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
 }
 
 .preview-header {
@@ -90,26 +96,34 @@
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 1rem;
 }
 
 .preview-item {
   position: relative;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+  transition: all 0.3s ease;
+}
+
+.preview-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(149, 157, 165, 0.2);
 }
 
 .preview-image {
   position: relative;
   width: 100%;
-  padding-bottom: 100%;
+  padding-bottom: 75%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  border-radius: 8px;
 }
 
 .remove-button {

@@ -77,38 +77,17 @@ function Gallery() {
     };
   }, [loadMore]);
 
-  // 获取随机的照片样式
-  const getPhotoStyle = useCallback(() => {
-    const baseStyles = {
-      transition: 'all 0.3s ease',
-      cursor: 'pointer',
-      borderRadius: '8px',
-      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 6px',
-      margin: '8px',
-    };
-
-    if (selectedSize === 'mixed') {
-      const randomSize = Math.random() > 0.5 ? 'large' : 'small';
-      return {
-        ...baseStyles,
-        width: randomSize === 'large' ? '300px' : '200px',
-        height: randomSize === 'large' ? '400px' : '300px',
-      };
-    }
-
+  // 获取照片样式类名
+  const getPhotoClassName = useCallback(() => {
+    let className = 'photo-item';
     if (selectedSize === 'large') {
-      return {
-        ...baseStyles,
-        width: '300px',
-        height: '400px',
-      };
+      className += ' large';
+    } else if (selectedSize === 'small') {
+      className += ' small';
+    } else {
+      className += Math.random() > 0.5 ? ' large' : ' small';
     }
-
-    return {
-      ...baseStyles,
-      width: '200px',
-      height: '300px',
-    };
+    return className;
   }, [selectedSize]);
 
   // 处理照片删除
@@ -134,16 +113,14 @@ function Gallery() {
       return (
         <div 
           key={photo.id}
-          className="photo-item" 
-          style={getPhotoStyle()}
+          className={getPhotoClassName()}
           onClick={() => setPreviewIndex(displayedPhotos.indexOf(photo))}
         >
-          <LazyLoadImage
+          <img
             src={photo.public_url}
             alt={photo.name}
-            effect="blur"
+            loading="lazy"
             className="photo-image"
-            wrapperClassName="photo-image-wrapper"
           />
           <div className="photo-info">
             <span className="photo-name">{photo.name}</span>
@@ -164,7 +141,7 @@ function Gallery() {
         </div>
       );
     },
-    [displayedPhotos, getPhotoStyle, handleDelete]
+    [displayedPhotos, getPhotoClassName, handleDelete]
   );
 
   // 渲染照片网格
@@ -288,7 +265,13 @@ function Gallery() {
         <ImagePreview
           photos={displayedPhotos}
           currentIndex={previewIndex}
-          onClose={() => setPreviewIndex(null)}
+          onClose={(newIndex) => {
+            if (typeof newIndex === 'number') {
+              setPreviewIndex(newIndex);
+            } else {
+              setPreviewIndex(null);
+            }
+          }}
         />
       )}
     </div>
