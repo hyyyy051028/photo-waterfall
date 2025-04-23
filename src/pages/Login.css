@@ -4,22 +4,36 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes backgroundFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-container.loading {
+  background: #f0f2f5;
+}
+
+.login-container.loaded {
+  animation: backgroundFadeIn 0.5s ease-out forwards;
+}
+
 .login-container {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('/imags/首页2.jpg'); /* 这里放置你的背景图片 */
+  background: url('../../imags/首页2.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
   background-size: cover;
-  background-position: center;
-  position: relative;
-  overflow: hidden;
-  animation: fadeIn 0.6s ease-out;
+  z-index: 1000;
+  will-change: opacity;
+  opacity: 0;
 }
 
 .login-container::before {
@@ -36,17 +50,19 @@
 
 .login-box {
   position: relative;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.2);
+  z-index: 1001;
+  background: rgba(255, 255, 255, 0.15);
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   width: 100%;
   max-width: 400px;
   animation: fadeIn 0.6s ease-out;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .login-title {

@@ -1,12 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+
+// 预加载图片
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = resolve;
+    img.onerror = reject;
+  });
+};
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // 预加载背景图片
+    preloadImage('../../imags/首页2.jpg')
+      .then(() => setIsLoading(false))
+      .catch(err => {
+        console.error('背景图片加载失败:', err);
+        setIsLoading(false);
+      });
+  }, []);
 
   const generateToken = (username) => {
     // 创建 token payload
@@ -37,7 +58,7 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
+    <div className={`login-container ${isLoading ? 'loading' : 'loaded'}`}>
       <div className="login-box">
         <h2 className="login-title">Camellia你好！</h2>
         <form className="login-form" onSubmit={handleSubmit}>
