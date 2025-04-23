@@ -1,0 +1,253 @@
+/* 瀑布流页面样式 */
+.gallery-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-header {
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.gallery-header h1 {
+  font-size: 2.5rem;
+  color: #1a237e;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.gallery-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.gallery-button {
+  background: #646cff;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.gallery-button:hover {
+  background: #535bf2;
+  transform: translateY(-2px);
+}
+
+/* 照片网格 */
+.gallery-grid {
+  flex: 1;
+  width: 100%;
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 2rem;
+  column-count: 4;
+  column-gap: 1rem;
+  min-height: 50vh;
+}
+
+@media (max-width: 1200px) {
+  .gallery-grid {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 900px) {
+  .gallery-grid {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery-grid {
+    column-count: 1;
+  }
+}
+
+/* 照片项 */
+.gallery-item {
+  position: relative;
+  background: #f5f5f5;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  cursor: pointer;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 图片 */
+.gallery-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  vertical-align: middle;
+}
+
+.gallery-image.loaded {
+  opacity: 1;
+}
+
+.gallery-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.gallery-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #646cff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gallery-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.gallery-item:hover .gallery-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gallery-name {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery-date {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* 删除按钮 */
+.gallery-delete {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff4444;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item:hover .gallery-delete {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.gallery-delete:hover {
+  background: #ff4444;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* 加载更多 */
+.gallery-load-more {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.gallery-load-more .gallery-spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+/* 空状态 */
+/* 加载状态 */
+.gallery-loading,
+.gallery-error,
+.gallery-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.gallery-loading p,
+.gallery-error p,
+.gallery-empty p {
+  margin: 1rem 0;
+  font-size: 1.2rem;
+}
+
+.gallery-error h2 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.gallery-loading .gallery-spinner {
+  margin-bottom: 1rem;
+}
+
+/* 照片计数 */
+.gallery-count {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}

@@ -11,8 +11,21 @@ export const PHOTOS_TABLE = 'photos';
 // 上传照片
 export const uploadPhoto = async (file, metadata) => {
   try {
+    if (!metadata.token) {
+      throw new Error('缺少认证信息');
+    }
+
     console.log('开始上传文件:', file.name);
     
+    // 验证文件类型和大小
+    if (!file.type.startsWith('image/')) {
+      throw new Error('只能上传图片文件');
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB
+      throw new Error('文件大小不能超过 10MB');
+    }
+
     // 生成唯一的文件名
     const timestamp = Date.now();
     const fileExt = file.name.split('.').pop();
@@ -26,7 +39,8 @@ export const uploadPhoto = async (file, metadata) => {
       .from('images')
       .upload(sanitizedName, file, {
         cacheControl: '3600',
-        upsert: true
+        upsert: true,
+        contentType: file.type
       });
 
     if (storageError) {
@@ -54,11 +68,13 @@ export const uploadPhoto = async (file, metadata) => {
     const { data, error } = await supabase
       .from(PHOTOS_TABLE)
       .insert({
-        ...metadata,
+        name: file.name, // 添加必填的name字段
         file_name: sanitizedName,
         original_name: file.name,
         public_url: publicUrlData.publicUrl,
-        upload_date: new Date().toISOString()
+        upload_date: new Date().toISOString(),
+        size: file.size,
+        type: file.type
       })
       .select()
       .single();
@@ -85,10 +101,19 @@ export const getAllPhotos = async () => {
       .order('upload_date', { ascending: false });
 
     if (error) throw error;
-    return data;
+    
+    // 确保返回的是数组
+    const photos = Array.isArray(data) ? data : [];
+    return { 
+      data: photos,
+      error: null 
+    };
   } catch (error) {
     console.error('Error getting photos:', error);
-    throw error;
+    return {
+      data: [],
+      error: error.message || '获取照片失败'
+    };
   }
 };
 

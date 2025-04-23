@@ -32,25 +32,47 @@ function Upload() {
   };
 
   // 处理拖放事件
-  const handleDrag = (e) => {
+  const handleDrag = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // 检查是否包含文件
+    if (e.dataTransfer?.items) {
+      const hasFiles = Array.from(e.dataTransfer.items).some(
+        item => item.kind === 'file'
+      );
+      if (!hasFiles) return;
+    }
+
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === 'dragleave' || e.type === 'drop') {
       setDragActive(false);
     }
-  };
+  }, []);
 
   // 处理拖放文件
-  const handleDrop = (e) => {
+  const handleDrop = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+
+    const items = e.dataTransfer?.items;
+    if (items) {
+      const files = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file') {
+          const file = items[i].getAsFile();
+          if (file) files.push(file);
+        }
+      }
+      if (files.length > 0) {
+        handleFileSelect(files);
+      }
+    } else if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileSelect(e.dataTransfer.files);
     }
-  };
+  }, [handleFileSelect]);
 
   // 处理文件删除
   const handleRemoveFile = (index) => {
@@ -74,8 +96,17 @@ function Upload() {
     setUploadError(null);
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('请先登录');
+      }
+
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
+        if (!file.type.startsWith('image/')) {
+          continue;
+        }
+
         const progress = ((i + 1) / selectedFiles.length) * 100;
         setUploadProgress(progress);
 
@@ -83,7 +114,8 @@ function Upload() {
           name: file.name,
           size: file.size,
           type: file.type,
-          upload_date: new Date().toISOString()
+          upload_date: new Date().toISOString(),
+          token: token
         };
 
         await uploadPhoto(file, metadata);
@@ -93,7 +125,11 @@ function Upload() {
       navigate('/gallery');
     } catch (error) {
       console.error('Error uploading photos:', error);
-      setUploadError(error.message || '上传照片失败，请稍后重试');
+      if (error.message === 'Failed to fetch') {
+        setUploadError('网络连接失败，请检查网络连接并重试');
+      } else {
+        setUploadError(error.message || '上传照片失败，请稍后重试');
+      }
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -153,7 +189,7 @@ function Upload() {
 
   return (
     <div className="upload-container">
-      <h1>照片上传</h1>
+      <h1>展示你的美丽吧！</h1>
       
       <div 
         className={`upload-area ${dragActive ? 'drag-active' : ''}`}
@@ -188,13 +224,21 @@ function Upload() {
         <div className="preview-container">
           <div className="preview-header">
             <h2>已选择 {selectedFiles.length} 张照片</h2>
-            <button
-              className="upload-button"
-              onClick={handleUpload}
-              disabled={uploading}
-            >
-              {uploading ? '正在上传...' : '开始上传'}
-            </button>
+            <div className="upload-buttons">
+              <button
+                className="upload-button"
+                onClick={handleUpload}
+                disabled={selectedFiles.length === 0 || uploading}
+              >
+                {uploading ? '上传中...' : '开始上传'}
+              </button>
+              <button
+                className="gallery-button"
+                onClick={() => navigate('/gallery')}
+              >
+                查看照片库
+              </button>
+            </div>
           </div>
           <div className="preview-grid">
             {selectedFiles.map((file, index) => renderFilePreview(file, index))}

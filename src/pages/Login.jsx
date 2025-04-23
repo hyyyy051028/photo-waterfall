@@ -1,0 +1,78 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
+
+export default function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const generateToken = (username) => {
+    // 创建 token payload
+    const payload = {
+      username,
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24小时过期
+      iat: Math.floor(Date.now() / 1000)
+    };
+
+    // 简单的 JWT 结构
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const content = btoa(JSON.stringify(payload));
+    const signature = btoa('your-secret-key'); // 实际应用中应该使用更安全的签名方法
+
+    return `${header}.${content}.${signature}`;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (username === 'camellia' && password === '20060221') {
+      const token = generateToken(username);
+      localStorage.setItem('token', token);
+      localStorage.setItem('isLoggedIn', 'true');
+      navigate('/gallery');
+    } else {
+      setError('用户名或密码错误');
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <h2 className="login-title">Camellia你好！</h2>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              className="form-input"
+              placeholder="用户名"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="form-input"
+              placeholder="密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <button type="submit" className="login-button">
+            登录
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
