@@ -3,15 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import './Home.css';
 
+// 导入轮播图图片
+import carousel1 from '../../imags/轮播1.jpg';
+import carousel2 from '../../imags/轮播2.jpg';
+import carousel3 from '../../imags/轮播3.jpg';
+import carousel4 from '../../imags/轮播4.jpg';
+import carousel5 from '../../imags/轮播5.jpg';
+
 function Home() {
   const navigate = useNavigate();
   
   const carouselImages = [
-    './imags/轮播1.jpg',
-    './imags/轮播2.jpg',
-    './imags/轮播3.jpg',
-    './imags/轮播4.jpg',
-    './imags/轮播5.jpg'
+    carousel1,
+    carousel2,
+    carousel3,
+    carousel4,
+    carousel5
   ];
 
   return (

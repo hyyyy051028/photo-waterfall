@@ -26,25 +26,41 @@ function Carousel({ images, interval = 5000 }) {
   }, [images.length, startAutoPlay]);
 
   useEffect(() => {
+    let mounted = true;
+
     const loadImages = async () => {
       try {
-        await Promise.all(images.map(src => {
+        const imagePromises = images.map(src => {
           return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = src;
-            img.onload = resolve;
-            img.onerror = reject;
+            img.onload = () => resolve(src);
+            img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
           });
-        }));
-        setIsLoaded(true);
-        startAutoPlay();
+        });
+
+        const results = await Promise.allSettled(imagePromises);
+        const failedImages = results.filter(r => r.status === 'rejected');
+        
+        if (failedImages.length > 0) {
+          console.warn('Some images failed to load:', 
+            failedImages.map(f => f.reason.message));
+        }
+
+        if (mounted) {
+          setIsLoaded(true);
+          startAutoPlay();
+        }
       } catch (error) {
         console.error('Failed to load images:', error);
+        if (mounted) setIsLoaded(true); // 即使出错也显示轮播图
       }
     };
 
     loadImages();
+
     return () => {
+      mounted = false;
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [images, startAutoPlay]);
