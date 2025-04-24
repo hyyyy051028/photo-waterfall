@@ -1,0 +1,105 @@
+.home-page {
+  width: 100%;
+}
+
+.home-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-content {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  background: url('../../imags/首页2.jpg') center/cover no-repeat fixed;
+}
+
+.home-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 800px;
+  width: 90%;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.home-content h1 {
+  font-size: 3.5rem;
+  color: #1a237e;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.home-content h2 {
+  font-size: 1.8rem;
+  color: #666;
+  margin-bottom: 3rem;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-weight: 400;
+}
+
+.home-actions {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.home-button {
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.home-button.primary {
+  background: #1a237e;
+  color: white;
+}
+
+.home-button.secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a237e;
+  border: 2px solid #1a237e;
+}
+
+.home-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-container {
+  width: 100%;
+  height: 800px;
+  position: relative;
+  margin: 3rem 0;
+  padding: 0;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}

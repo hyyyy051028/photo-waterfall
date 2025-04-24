@@ -18,12 +18,16 @@
 body {
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
+  margin: 0;
+  padding: 0;
+  background: #f5f7fa;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* 基础按钮样式 */

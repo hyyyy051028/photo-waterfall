@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllPhotos, deletePhoto } from '../supabase';
 import ImagePreview from '../components/ImagePreview';
 import PhotoItem from '../components/PhotoItem';
+
 import './Gallery.css';
 
 function Gallery() {
@@ -164,55 +165,58 @@ function Gallery() {
   }
 
   return (
-    <div className="gallery-container">
-      <header className="gallery-header">
-        <h1>山茶花开
-
-        </h1>
-        <div className="gallery-controls">
-          <button className="gallery-button" onClick={() => navigate('/')}>
-            来上传更多的美丽吧~
-          </button>
+    <div className="gallery-page">
+      <div className="gallery-container">
+        <div className="gallery-header">
+          <h1>山茶花开</h1>
+          <br/>
+          <h2>众里嫣然通一顾，人间颜色如尘土</h2>
+          <p className="gallery-count">{allPhotos.length} 张照片</p>
+          <div className="gallery-controls">
+            <div className="gallery-left"></div>
+            <button className="gallery-button" onClick={() => navigate('/')}>
+              来上传更多的美丽吧~
+            </button>
+          </div>
         </div>
-        <p className="gallery-count">{allPhotos.length} 张照片</p>
-      </header>
 
-      {loading && displayedPhotos.length === 0 ? (
-        <div className="gallery-loading">
-          <div className="gallery-spinner"></div>
-          <p>正在加载照片...</p>
-        </div>
-      ) : allPhotos.length === 0 ? (
-        <div className="gallery-empty">
-          <p>还没有上传任何照片</p>
-          <button className="gallery-button" onClick={() => navigate('/')}>
-            去上传照片
-          </button>
-        </div>
-      ) : (
-        <>
-          {renderPhotoGrid()}
-          {hasMore && (
-            <div ref={loadMoreRef} className="gallery-load-more">
-              {loadingMore ? '加载更多...' : '向下滚动加载更多'}
-            </div>
-          )}
-        </>
-      )}
+        {loading && displayedPhotos.length === 0 ? (
+          <div className="gallery-loading">
+            <div className="gallery-spinner"></div>
+            <p>正在加载照片...</p>
+          </div>
+        ) : allPhotos.length === 0 ? (
+          <div className="gallery-empty">
+            <p>还没有上传任何照片</p>
+            <button className="gallery-button" onClick={() => navigate('/')}>
+              去上传照片
+            </button>
+          </div>
+        ) : (
+          <>
+            {renderPhotoGrid()}
+            {hasMore && (
+              <div ref={loadMoreRef} className="gallery-load-more">
+                {loadingMore ? '加载更多...' : '向下滚动加载更多'}
+              </div>
+            )}
+          </>
+        )}
 
-      {previewIndex !== null && displayedPhotos[previewIndex] && (
-        <ImagePreview
-          photos={displayedPhotos}
-          currentIndex={previewIndex}
-          onClose={(newIndex) => {
-            if (typeof newIndex === 'number' && newIndex >= 0 && newIndex < displayedPhotos.length) {
-              setPreviewIndex(newIndex);
-            } else {
-              setPreviewIndex(null);
-            }
-          }}
-        />
-      )}
+        {previewIndex !== null && displayedPhotos[previewIndex] && (
+          <ImagePreview
+            photos={displayedPhotos}
+            currentIndex={previewIndex}
+            onClose={(newIndex) => {
+              if (typeof newIndex === 'number' && newIndex >= 0 && newIndex < displayedPhotos.length) {
+                setPreviewIndex(newIndex);
+              } else {
+                setPreviewIndex(null);
+              }
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

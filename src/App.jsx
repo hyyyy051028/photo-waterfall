@@ -1,7 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Upload from './pages/Upload'
 import Gallery from './pages/Gallery'
 import Login from './pages/Login'
+import Home from './pages/Home'
 import './App.css'
 
 function PrivateRoute({ children }) {
@@ -30,12 +32,43 @@ function PrivateRoute({ children }) {
   return children;
 }
 
-function App() {
+function AppContent() {
+  const [navVisible, setNavVisible] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/gallery') {
+      const timer = setTimeout(() => {
+        setNavVisible(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setNavVisible(true);
+    }
+  }, [location.pathname]);
+
   return (
-    <Router>
+    <>
+      <div className="nav-hover-area" />
+
+      <nav className={`nav-header ${!navVisible ? 'hidden' : ''}`}>
+        <div className="nav-container">
+          <NavLink to="/" className="nav-logo">山茶花开</NavLink>
+          <div className="nav-links">
+            <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end>首页</NavLink>
+            <NavLink to="/upload" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>上传</NavLink>
+            <NavLink to="/gallery" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>瀑布流</NavLink>
+          </div>
+        </div>
+      </nav>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        } />
+        <Route path="/upload" element={
           <PrivateRoute>
             <Upload />
           </PrivateRoute>
@@ -46,6 +79,14 @@ function App() {
           </PrivateRoute>
         } />
       </Routes>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   )
 }

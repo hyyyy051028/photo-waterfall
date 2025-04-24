@@ -51,7 +51,7 @@ export default function Login() {
       const token = generateToken(username);
       localStorage.setItem('token', token);
       localStorage.setItem('isLoggedIn', 'true');
-      navigate('/gallery');
+      navigate('/');
     } else {
       setError('用户名或密码错误');
     }

@@ -1,23 +1,89 @@
 /* 应用容器 */
-.app {
+#root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* 头部样式 */
-.header {
-  background: white;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.header h1 {
-  font-size: 2.5rem;
+.nav-hover-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 999;
+}
+
+.nav-header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-hover-area:hover + .nav-header.hidden,
+.nav-header.hidden:hover {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #1a237e;
-  text-align: center;
-  margin-bottom: 1.5rem;
+  text-decoration: none;
 }
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1a237e;
+}
+
+.nav-link.active {
+  background: #1a237e;
+  color: white;
+}
+
+
 
 .controls {
   display: flex;
