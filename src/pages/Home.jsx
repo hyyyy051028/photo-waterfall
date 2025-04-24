@@ -7,11 +7,11 @@ function Home() {
   const navigate = useNavigate();
   
   const carouselImages = [
-    '/imags/轮播1.jpg',
-    '/imags/轮播2.jpg',
-    '/imags/轮播3.jpg',
-    '/imags/轮播4.jpg',
-    '/imags/轮播5.jpg'
+    './imags/轮播1.jpg',
+    './imags/轮播2.jpg',
+    './imags/轮播3.jpg',
+    './imags/轮播4.jpg',
+    './imags/轮播5.jpg'
   ];
 
   return (
