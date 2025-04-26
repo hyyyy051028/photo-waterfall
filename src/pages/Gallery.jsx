@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowUpOutlined } from '@ant-design/icons';
+import MusicPlayer from '../components/MusicPlayer';
 import { useNavigate } from 'react-router-dom';
 import { getAllPhotos, deletePhoto } from '../supabase';
 import ImagePreview from '../components/ImagePreview';
@@ -14,6 +16,7 @@ function Gallery() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true); // 初始状态设置为 true
   const [error, setError] = useState(null);
+  const [showBackTop, setShowBackTop] = useState(false);
   const PAGE_SIZE = 12;
   const loadMoreRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
@@ -92,6 +95,23 @@ function Gallery() {
   }, [loadingMore, hasMore, loading, displayedPhotos.length, allPhotos, PAGE_SIZE]);
 
   // 监听滚动
+  // 监听滚动，控制返回顶部按钮显示
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 返回顶部功能
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -166,14 +186,24 @@ function Gallery() {
 
   return (
     <div className="gallery-page">
+      <MusicPlayer />
       <div className="gallery-container">
+        {showBackTop && (
+          <button
+            className="back-to-top"
+            onClick={scrollToTop}
+            aria-label="返回顶部"
+          >
+            <ArrowUpOutlined />
+          </button>
+        )}
         <div className="gallery-header">
           <h1>山茶花开</h1>
           <br/>
           <h2>众里嫣然通一顾，人间颜色如尘土</h2>
           <p className="gallery-count">{allPhotos.length} 张照片</p>
           <div className="gallery-controls">
-            <div className="gallery-left"></div>
+            {error && <div className="gallery-error">{error}</div>}
             <button className="gallery-button" onClick={() => navigate('/')}>
               来上传更多的美丽吧~
             </button>
