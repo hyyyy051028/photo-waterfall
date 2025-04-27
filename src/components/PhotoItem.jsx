@@ -14,7 +14,8 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
       loadAndCacheImage(photo.public_url).catch(console.error);
     };
     
-    img.onerror = () => {
+    img.onerror = (event) => {
+      console.log('图片加载失败:', photo.public_url);
       setIsError(true);
       setIsLoaded(true);
     };
@@ -43,6 +44,11 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
       {!isLoaded && !isError && (
         <div className="gallery-placeholder">
           <div className="gallery-spinner"></div>
+        </div>
+      )}
+      {isError && (
+        <div className="gallery-error-placeholder">
+          <span>图片加载失败</span>
         </div>
       )}
       <img

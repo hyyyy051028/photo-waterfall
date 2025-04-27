@@ -26,14 +26,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('../../imags/首页2.jpg') no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
+  background-color: #f0f2f5;
   z-index: 1000;
   will-change: opacity;
   opacity: 0;
+}
+
+.login-container.loaded {
+  background: url('../../imags/首页2.jpg') no-repeat center center;
+  background-size: cover;
 }
 
 .login-container::before {
@@ -44,8 +45,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
 .login-box {

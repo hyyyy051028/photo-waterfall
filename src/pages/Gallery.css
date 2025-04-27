@@ -208,7 +208,7 @@
   opacity: 1;
 }
 
-.gallery-placeholder {
+.gallery-placeholder, .gallery-error-placeholder {
   position: absolute;
   top: 0;
   left: 0;
@@ -218,6 +218,14 @@
   align-items: center;
   justify-content: center;
   background: #f5f5f5;
+}
+
+.gallery-error-placeholder {
+  background: #fff5f5;
+  color: #ff4444;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
 }
 
 .gallery-spinner {
