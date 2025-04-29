@@ -40,8 +40,24 @@ class CacheMetadata {
   }
 }
 
+// 检查存储是否可用
+const isStorageAvailable = () => {
+  try {
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 // 加载缓存元数据
 const loadMetadata = () => {
+  if (!isStorageAvailable()) {
+    return new CacheMetadata();
+  }
+
   try {
     const data = localStorage.getItem(CACHE_METADATA_KEY);
     if (!data) return new CacheMetadata();
@@ -53,13 +69,17 @@ const loadMetadata = () => {
     });
     return metadata;
   } catch (e) {
-    console.error('Failed to load cache metadata:', e);
+    console.warn('Failed to load cache metadata, continuing without cache');
     return new CacheMetadata();
   }
 };
 
 // 保存缓存元数据
 const saveMetadata = (metadata) => {
+  if (!isStorageAvailable()) {
+    return;
+  }
+
   try {
     const data = {
       items: Object.fromEntries(metadata.items),
@@ -67,7 +87,9 @@ const saveMetadata = (metadata) => {
     };
     localStorage.setItem(CACHE_METADATA_KEY, JSON.stringify(data));
   } catch (e) {
-    console.error('Failed to save cache metadata:', e);
+    console.warn('Failed to save cache metadata, continuing without cache');
+    // 如果存储失败，清理所有缓存避免不一致
+    clearAllCache();
   }
 };
 
@@ -82,7 +104,8 @@ const clearAllCache = () => {
     // 重置元数据
     localStorage.removeItem(CACHE_METADATA_KEY);
   } catch (e) {
-    console.error('Failed to clear cache:', e);
+    console.warn('Storage failed, clearing all cache');
+    // 如果清理失败，不抛出错误，让应用继续运行
   }
 };
 

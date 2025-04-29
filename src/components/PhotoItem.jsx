@@ -10,6 +10,8 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
 
   useEffect(() => {
     let mounted = true;
+    let retryTimeout = null;
+
     const loadImage = () => {
       const img = new Image();
       
@@ -18,32 +20,48 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
           setIsLoaded(true);
           setIsError(false);
           // 后台缓存图片，不阻塞显示
-          loadAndCacheImage(photo.public_url).catch(console.error);
+          loadAndCacheImage(photo.public_url).catch(() => {
+            // 缓存失败不影响显示
+            console.warn('Failed to cache image, continuing without cache');
+          });
         }
       };
       
       img.onerror = (event) => {
-        console.log(`图片加载失败 (重试 ${retryCount + 1}/${MAX_RETRIES}):`, photo.public_url);
-        if (mounted) {
-          if (retryCount < MAX_RETRIES) {
-            // 延迟重试，每次重试间隔增加
-            setTimeout(() => {
+        if (!mounted) return;
+
+        if (retryCount < MAX_RETRIES) {
+          console.log(`图片加载失败 (重试 ${retryCount + 1}/${MAX_RETRIES}):`, photo.public_url);
+          // 添加随机延迟，避免同时重试多个图片
+          const delay = 1000 * (retryCount + 1) + Math.random() * 1000;
+          retryTimeout = setTimeout(() => {
+            if (mounted) {
               setRetryCount(prev => prev + 1);
-            }, 1000 * (retryCount + 1));
-          } else {
-            setIsError(true);
-            setIsLoaded(true);
-          }
+            }
+          }, delay);
+        } else {
+          console.warn(`图片加载失败，已达到最大重试次数:`, photo.public_url);
+          setIsError(true);
+          setIsLoaded(true);
         }
       };
       
-      img.src = photo.public_url;
+      // 尝试从缓存加载
+      const cachedImage = isImageCached(photo.public_url);
+      if (cachedImage) {
+        img.src = photo.public_url;
+      } else {
+        // 如果没有缓存，直接从网络加载
+        img.src = `${photo.public_url}?t=${Date.now()}`; // 添加时间戳避免浏览器缓存
+      }
       
-      // 如果图片已经缓存，可能会立即触发 onload
-      if (img.complete && !img.naturalWidth) {
-        img.onerror();
-      } else if (img.complete) {
-        img.onload();
+      // 如果图片已经加载完成
+      if (img.complete) {
+        if (!img.naturalWidth) {
+          img.onerror();
+        } else {
+          img.onload();
+        }
       }
       
       return img;
@@ -53,6 +71,9 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
     
     return () => {
       mounted = false;
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
       img.onload = null;
       img.onerror = null;
     };

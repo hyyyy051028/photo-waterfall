@@ -132,7 +132,7 @@ export const deletePhoto = async (id) => {
     // 删除存储桶中的文件
     const { error: storageError } = await supabase
       .storage
-      .from('photos')
+      .from('images')
       .remove([photoData.file_name]);
 
     if (storageError) throw storageError;
