@@ -5,33 +5,58 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
+
   useEffect(() => {
-    const img = new Image();
-    
-    img.onload = () => {
-      setIsLoaded(true);
-      // 后台缓存图片，不阻塞显示
-      loadAndCacheImage(photo.public_url).catch(console.error);
+    let mounted = true;
+    const loadImage = () => {
+      const img = new Image();
+      
+      img.onload = () => {
+        if (mounted) {
+          setIsLoaded(true);
+          setIsError(false);
+          // 后台缓存图片，不阻塞显示
+          loadAndCacheImage(photo.public_url).catch(console.error);
+        }
+      };
+      
+      img.onerror = (event) => {
+        console.log(`图片加载失败 (重试 ${retryCount + 1}/${MAX_RETRIES}):`, photo.public_url);
+        if (mounted) {
+          if (retryCount < MAX_RETRIES) {
+            // 延迟重试，每次重试间隔增加
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+            }, 1000 * (retryCount + 1));
+          } else {
+            setIsError(true);
+            setIsLoaded(true);
+          }
+        }
+      };
+      
+      img.src = photo.public_url;
+      
+      // 如果图片已经缓存，可能会立即触发 onload
+      if (img.complete && !img.naturalWidth) {
+        img.onerror();
+      } else if (img.complete) {
+        img.onload();
+      }
+      
+      return img;
     };
-    
-    img.onerror = (event) => {
-      console.log('图片加载失败:', photo.public_url);
-      setIsError(true);
-      setIsLoaded(true);
-    };
-    
-    img.src = photo.public_url;
-    
-    // 如果图片已经缓存，可能会立即触发 onload
-    if (img.complete) {
-      setIsLoaded(true);
-    }
+
+    const img = loadImage();
     
     return () => {
+      mounted = false;
       img.onload = null;
       img.onerror = null;
     };
-  }, [photo.public_url]);
+  }, [photo.public_url, retryCount]);
 
   return (
     <div
