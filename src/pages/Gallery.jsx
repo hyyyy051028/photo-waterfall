@@ -14,9 +14,11 @@ function Gallery() {
   const [previewIndex, setPreviewIndex] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [loading, setLoading] = useState(true); // 初始状态设置为 true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showBackTop, setShowBackTop] = useState(false);
+  const [sortMode, setSortMode] = useState('date'); // 'date', 'random', 'name'
+  const [showSortMenu, setShowSortMenu] = useState(false);
   const PAGE_SIZE = 12;
   const loadMoreRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
@@ -32,16 +34,19 @@ function Gallery() {
       if (!data) throw new Error('没有获取到照片数据');
       
       const processedData = Array.isArray(data) ? data : [];
-      const sortedData = processedData
+      const filteredData = processedData
         .filter(photo => photo && photo.upload_date && photo.public_url)
-        .sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date))
         .map(photo => ({
           id: photo.id,
           name: photo.name || '未命名照片',
           upload_date: photo.upload_date,
           public_url: photo.public_url,
-          thumbnailUrl: photo.public_url
+          thumbnailUrl: photo.public_url,
+          randomSeed: Math.random() // 添加随机种子用于随机排序
         }));
+
+      // 根据当前排序模式对数据进行排序
+      const sortedData = sortPhotos(filteredData, sortMode);
       
       // 使用函数式更新确保状态一致性
       setAllPhotos(sortedData);
@@ -152,6 +157,43 @@ function Gallery() {
     []
   );
 
+  // 照片排序函数
+  const sortPhotos = useCallback((photos, mode) => {
+    switch (mode) {
+      case 'random':
+        return [...photos].sort((a, b) => a.randomSeed - b.randomSeed);
+      case 'name':
+        return [...photos].sort((a, b) => a.name.localeCompare(b.name));
+      case 'date':
+      default:
+        return [...photos].sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
+    }
+  }, []);
+
+  // 切换排序模式
+  const handleSortChange = useCallback((newMode) => {
+    if (newMode === 'random' && sortMode === 'random') {
+      // 如果已经是随机排序模式，则重新随机排序
+      setAllPhotos(prev => {
+        const newPhotos = prev.map(photo => ({
+          ...photo,
+          randomSeed: Math.random() // 重新生成随机种子
+        }));
+        const newSorted = sortPhotos(newPhotos, 'random');
+        setDisplayedPhotos(newSorted.slice(0, displayedPhotos.length));
+        return newSorted;
+      });
+    } else {
+      setSortMode(newMode);
+      setAllPhotos(prev => {
+        const newSorted = sortPhotos(prev, newMode);
+        setDisplayedPhotos(newSorted.slice(0, displayedPhotos.length));
+        return newSorted;
+      });
+    }
+    setShowSortMenu(false); // 选择后关闭菜单
+  }, [sortMode, sortPhotos, displayedPhotos.length]);
+
   // 渲染单个照片项
   const renderPhotoItem = useCallback(
     (photo, index) => (
@@ -201,8 +243,43 @@ function Gallery() {
           <h1>山茶花开</h1>
           <br/>
           <h2>众里嫣然通一顾，人间颜色如尘土</h2>
-          <p className="gallery-count">{allPhotos.length} 张照片</p>
           <div className="gallery-controls">
+            <div className="sort-dropdown">
+              <button 
+                className="sort-dropdown-button"
+                onClick={() => setShowSortMenu(!showSortMenu)}
+              >
+                <span>
+                  {sortMode === 'date' ? '按时间' :
+                   sortMode === 'random' ? '随机排序' :
+                   '按名称'}
+                </span>
+                <span className="dropdown-arrow">{showSortMenu ? '▲' : '▼'}</span>
+              </button>
+              {showSortMenu && (
+                <div className="sort-dropdown-menu">
+                  <button 
+                    className={`sort-menu-item ${sortMode === 'date' ? 'active' : ''}`}
+                    onClick={() => handleSortChange('date')}
+                  >
+                    按时间
+                  </button>
+                  <button 
+                    className={`sort-menu-item ${sortMode === 'random' ? 'active' : ''}`}
+                    onClick={() => handleSortChange('random')}
+                  >
+                    随机排序
+                  </button>
+                  <button 
+                    className={`sort-menu-item ${sortMode === 'name' ? 'active' : ''}`}
+                    onClick={() => handleSortChange('name')}
+                  >
+                    按名称
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="gallery-count">{allPhotos.length} 张照片</p>
             {error && <div className="gallery-error">{error}</div>}
             <button className="gallery-button" onClick={() => navigate('/')}>
               来上传更多的美丽吧~

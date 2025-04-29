@@ -72,6 +72,93 @@
   color: white;
 }
 
+.gallery-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.sort-dropdown {
+  position: absolute;
+  top: -60px;
+  left: 20px;
+  z-index: 100;
+}
+
+.sort-dropdown-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #1a237e;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a237e;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(26, 35, 126, 0.1);
+}
+
+.sort-dropdown-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.15);
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.sort-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  min-width: 120px;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sort-menu-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: #1a237e;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.sort-menu-item:hover {
+  background: rgba(26, 35, 126, 0.1);
+}
+
+.sort-menu-item.active {
+  background: rgba(26, 35, 126, 0.05);
+  font-weight: 500;
+}
+
 .gallery-header h1 {
   font-size: 1.8rem;
   color: #1a237e;
