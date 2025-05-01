@@ -281,7 +281,7 @@ function Gallery() {
             </div>
             <p className="gallery-count">{allPhotos.length} 张照片</p>
             {error && <div className="gallery-error">{error}</div>}
-            <button className="gallery-button" onClick={() => navigate('/')}>
+            <button className="gallery-button" onClick={() => navigate('/upload')}>
               来上传更多的美丽吧~
             </button>
           </div>
