@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadPhoto } from '../supabase';
-import '../styles/Upload.css';
+import './Upload.css';
 
 function Upload() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -189,7 +189,7 @@ function Upload() {
 
   return (
     <div className="upload-container">
-      <h1>展示你的美丽吧！</h1>
+      <h1>分享你的精彩瞬间</h1>
       
       <div 
         className={`upload-area ${dragActive ? 'drag-active' : ''}`}
@@ -236,7 +236,7 @@ function Upload() {
                 className="gallery-button"
                 onClick={() => navigate('/gallery')}
               >
-                查看照片库
+                进入我的相册
               </button>
             </div>
           </div>
