@@ -5,8 +5,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 照片表的定义
+// 表的定义
 export const PHOTOS_TABLE = 'photos';
+export const FAVORITES_TABLE = 'favorites';
 
 // 上传照片
 export const uploadPhoto = async (file, metadata) => {
@@ -166,6 +167,178 @@ export const updatePhoto = async (id, updates) => {
     return data;
   } catch (error) {
     console.error('Error updating photo:', error);
+    throw error;
+  }
+};
+
+// 切换照片收藏状态 - 使用数据库存储
+export const toggleFavorite = async (id, isFavorite) => {
+  try {
+    console.log(`尝试将照片 ${id} 的收藏状态设置为 ${isFavorite}`);
+    
+    // 先获取照片信息，确保它存在
+    const { data: photoData, error: photoError } = await supabase
+      .from(PHOTOS_TABLE)
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (photoError) {
+      console.error('获取照片信息失败:', photoError);
+      throw photoError;
+    }
+    
+    if (isFavorite) {
+      // 添加到收藏表
+      const { data: favoriteData, error: favoriteError } = await supabase
+        .from(FAVORITES_TABLE)
+        .insert({
+          photo_id: id,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+        
+      if (favoriteError) {
+        // 如果是唯一约束错误，说明已经收藏了，可以忽略
+        if (favoriteError.code !== '23505') { // PostgreSQL 唯一约束违反的错误代码
+          console.error('添加收藏失败:', favoriteError);
+          throw favoriteError;
+        }
+      }
+    } else {
+      // 从收藏表中移除
+      const { error: deleteError } = await supabase
+        .from(FAVORITES_TABLE)
+        .delete()
+        .eq('photo_id', id);
+        
+      if (deleteError) {
+        console.error('移除收藏失败:', deleteError);
+        throw deleteError;
+      }
+    }
+    
+    // 返回更新后的照片数据，并包含收藏状态
+    return { ...photoData, is_favorite: isFavorite };
+  } catch (error) {
+    console.error('Error toggling favorite status:', error);
+    throw error;
+  }
+};
+
+// 获取所有收藏的照片 - 使用数据库存储
+export const getFavoritePhotos = async () => {
+  try {
+    // 使用连接查询获取所有收藏的照片
+    const { data: photosData, error: photosError } = await supabase
+      .from(FAVORITES_TABLE)
+      .select(`
+        photo_id,
+        photos:${PHOTOS_TABLE}(*)
+      `)
+      .order('created_at', { ascending: false });
+      
+    if (photosError) throw photosError;
+    
+    // 处理查询结果，提取照片信息并添加 is_favorite 标记
+    const photos = (photosData || []).map(item => ({
+      ...item.photos,
+      is_favorite: true
+    }));
+    
+    return { 
+      data: photos,
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error getting favorite photos:', error);
+    return {
+      data: [],
+      error: error.message || '获取收藏照片失败'
+    };
+  }
+};
+
+// 获取照片的收藏状态
+export const getPhotoWithFavoriteStatus = async (id) => {
+  try {
+    // 获取照片信息
+    const { data: photoData, error: photoError } = await supabase
+      .from(PHOTOS_TABLE)
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (photoError) throw photoError;
+    
+    // 检查收藏状态
+    const isFavorite = await checkIsFavorite(id);
+    
+    return {
+      ...photoData,
+      is_favorite: isFavorite
+    };
+  } catch (error) {
+    console.error('Error getting photo with favorite status:', error);
+    throw error;
+  }
+};
+
+// 检查照片是否被收藏
+export const checkIsFavorite = async (id) => {
+  try {
+    const { data, error } = await supabase
+      .from(FAVORITES_TABLE)
+      .select('photo_id')
+      .eq('photo_id', id)
+      .single();
+      
+    if (error) {
+      // 如果是找不到记录的错误，说明没有收藏
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking favorite status:', error);
+    return false;
+  }
+};
+
+// 获取所有照片并包含收藏状态
+export const getAllPhotosWithFavoriteStatus = async () => {
+  try {
+    // 获取所有照片
+    const { data: photosData, error: photosError } = await supabase
+      .from(PHOTOS_TABLE)
+      .select('*')
+      .order('upload_date', { ascending: false });
+      
+    if (photosError) throw photosError;
+    
+    // 获取所有收藏的照片ID
+    const { data: favoritesData, error: favoritesError } = await supabase
+      .from(FAVORITES_TABLE)
+      .select('photo_id');
+      
+    if (favoritesError) throw favoritesError;
+    
+    // 提取收藏的照片ID
+    const favoriteIds = (favoritesData || []).map(fav => fav.photo_id);
+    
+    // 为每个照片添加收藏状态
+    const photosWithFavoriteStatus = (photosData || []).map(photo => ({
+      ...photo,
+      is_favorite: favoriteIds.includes(photo.id)
+    }));
+    
+    return photosWithFavoriteStatus;
+  } catch (error) {
+    console.error('Error getting photos with favorite status:', error);
     throw error;
   }
 };

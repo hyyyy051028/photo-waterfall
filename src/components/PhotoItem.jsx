@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { loadAndCacheImage, isImageCached } from '../services/cacheService';
+import { StarOutlined, StarFilled } from '@ant-design/icons';
+import './PhotoItem.css';
 
-const PhotoItem = ({ photo, onDelete, onClick }) => {
+const PhotoItem = ({ photo, onDelete, onClick, onToggleFavorite }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -111,20 +113,34 @@ const PhotoItem = ({ photo, onDelete, onClick }) => {
           <span>加载失败</span>
         </div>
       )}
+      
+      {/* 收藏按钮 - 右上角 */}
+      <button
+        className={`gallery-favorite ${photo.is_favorite ? 'active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite && onToggleFavorite(photo.id, !photo.is_favorite);
+        }}
+      >
+        {photo.is_favorite ? <StarFilled style={{ color: '#FFD700' }} /> : <StarOutlined />}
+      </button>
+      
+      {/* 删除按钮 - 右上角 */}
+      <button
+        className="gallery-delete"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(photo.id);
+        }}
+      >
+        ×
+      </button>
+      
       <div className="gallery-info">
         <span className="gallery-name">{photo.name}</span>
         <span className="gallery-date">
           {new Date(photo.upload_date).toLocaleDateString()}
         </span>
-        <button
-          className="gallery-delete"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(photo.id);
-          }}
-        >
-          ×
-        </button>
       </div>
     </div>
   );

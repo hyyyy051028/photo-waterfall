@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowUpOutlined } from '@ant-design/icons';
 import MusicPlayer from '../components/MusicPlayer';
 import { useNavigate } from 'react-router-dom';
-import { getAllPhotos, deletePhoto } from '../supabase';
+import { getAllPhotosWithFavoriteStatus, deletePhoto, toggleFavorite, checkIsFavorite } from '../supabase';
 import ImagePreview from '../components/ImagePreview';
 import PhotoItem from '../components/PhotoItem';
 
@@ -29,8 +29,8 @@ function Gallery() {
     if (!hasMore) return;
     
     try {
-      const { data, error } = await getAllPhotos();
-      if (error) throw error;
+      // 直接获取带有收藏状态的照片
+      const data = await getAllPhotosWithFavoriteStatus();
       if (!data) throw new Error('没有获取到照片数据');
       
       const processedData = Array.isArray(data) ? data : [];
@@ -42,6 +42,7 @@ function Gallery() {
           upload_date: photo.upload_date,
           public_url: photo.public_url,
           thumbnailUrl: photo.public_url,
+          is_favorite: photo.is_favorite, // 从数据库获取收藏状态
           randomSeed: Math.random() // 添加随机种子用于随机排序
         }));
 
@@ -156,6 +157,33 @@ function Gallery() {
     },
     []
   );
+  
+  // 处理照片收藏状态切换
+  const handleToggleFavorite = useCallback(
+    async (photoId, newFavoriteState) => {
+      try {
+        // 使用 Supabase 切换收藏状态
+        await toggleFavorite(photoId, newFavoriteState);
+        
+        // 更新本地状态
+        const updatePhotoState = (photos) => {
+          return photos.map(photo => {
+            if (photo.id === photoId) {
+              return { ...photo, is_favorite: newFavoriteState };
+            }
+            return photo;
+          });
+        };
+        
+        setAllPhotos(updatePhotoState);
+        setDisplayedPhotos(updatePhotoState);
+      } catch (error) {
+        console.error('Error toggling favorite status:', error);
+        alert('更新收藏状态失败，请稍后重试');
+      }
+    },
+    []
+  );
 
   // 照片排序函数
   const sortPhotos = useCallback((photos, mode) => {
@@ -201,10 +229,11 @@ function Gallery() {
         key={photo.id}
         photo={photo}
         onDelete={handleDelete}
+        onToggleFavorite={handleToggleFavorite}
         onClick={() => setPreviewIndex(index)}
       />
     ),
-    [handleDelete, setPreviewIndex]
+    [handleDelete, handleToggleFavorite, setPreviewIndex]
   );
 
   // 渲染照片网格
